@@ -11,27 +11,12 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
 builder.Services.AddControllers();
+builder.Services.AddDomainServices();
 
 //builder.Services.AddLogging(c => c.AddJsonConsole());
 
-//Log.Logger = new LoggerConfiguration()
-//    .MinimumLevel.Debug()
-//    .WriteTo.Console()
-//    .CreateLogger();
 
-var outputTemplate = "\"[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine} Environment:{Environment} ThreadId: {ThreadId} {Exception}\"";
-
-Log.Logger = new LoggerConfiguration()
-    .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
-    .MinimumLevel.Debug()
-    .Enrich.WithThreadId()
-    .Enrich.WithProperty("Environment", builder.Environment.EnvironmentName)
-    .WriteTo.Console(outputTemplate: outputTemplate)
-    .WriteTo.File(@"C:\Users\namiqrasullu\source\repos\TodoWebService\TodoWebService\logs\mylog.txt", rollingInterval: RollingInterval.Day, outputTemplate : outputTemplate)
-    .WriteTo.MSSqlServer(builder.Configuration.GetConnectionString("TodoDbConnectionString"), "logs", autoCreateSqlTable: true)
-    .CreateLogger();
-
-builder.Host.UseSerilog();
+builder.Host.UseSerilog((context, configuration) => configuration.ReadFrom.Configuration(context.Configuration));
 
 builder.Services.AddHttpContextAccessor();
 
